@@ -296,80 +296,114 @@ UNFOLD = {
     "SCRIPTS": [
         lambda request: """
             <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Observe for date picker modals
-                    const observer = new MutationObserver(function(mutations) {
-                        mutations.forEach(function(mutation) {
-                            mutation.addedNodes.forEach(function(node) {
+                (function() {
+                    // Function to add Save button to date picker
+                    function addSaveButton(calendar) {
+                        if (!calendar || calendar.querySelector('.datepicker-save-btn')) {
+                            return; // Already has save button or invalid calendar
+                        }
+                        
+                        // Find or create footer
+                        let footer = calendar.querySelector('.flatpickr-footer, .flatpickr-buttons');
+                        if (!footer) {
+                            // Look for any container with buttons
+                            const cancelBtn = calendar.querySelector('button');
+                            if (cancelBtn && cancelBtn.textContent.toLowerCase().includes('cancel')) {
+                                footer = cancelBtn.parentElement;
+                            }
+                        }
+                        
+                        if (!footer) {
+                            // Create new footer
+                            footer = document.createElement('div');
+                            footer.className = 'flatpickr-footer';
+                            footer.style.cssText = 'display: flex; gap: 8px; padding: 12px; border-top: 1px solid #e5e7eb;';
+                            calendar.appendChild(footer);
+                        }
+                        
+                        // Create Save button
+                        const saveBtn = document.createElement('button');
+                        saveBtn.textContent = 'Save';
+                        saveBtn.className = 'datepicker-save-btn';
+                        saveBtn.type = 'button';
+                        saveBtn.style.cssText = `
+                            background-color: #d97706;
+                            color: white;
+                            border: none;
+                            padding: 8px 16px;
+                            border-radius: 6px;
+                            font-weight: 500;
+                            cursor: pointer;
+                            transition: background-color 0.2s;
+                        `;
+                        
+                        // Hover effects
+                        saveBtn.addEventListener('mouseenter', () => {
+                            saveBtn.style.backgroundColor = '#b45309';
+                        });
+                        saveBtn.addEventListener('mouseleave', () => {
+                            saveBtn.style.backgroundColor = '#d97706';
+                        });
+                        
+                        // Save functionality
+                        saveBtn.addEventListener('click', () => {
+                            // Get the flatpickr instance
+                            const fpInstance = calendar._flatpickr;
+                            if (fpInstance) {
+                                fpInstance.close();
+                            } else {
+                                // Fallback: hide calendar
+                                calendar.style.display = 'none';
+                                if (calendar.classList.contains('open')) {
+                                    calendar.classList.remove('open');
+                                }
+                            }
+                        });
+                        
+                        // Add Save button before Cancel
+                        const cancelBtn = footer.querySelector('button');
+                        if (cancelBtn) {
+                            footer.insertBefore(saveBtn, cancelBtn);
+                        } else {
+                            footer.appendChild(saveBtn);
+                        }
+                    }
+                    
+                    // Observer to detect when date pickers appear
+                    const observer = new MutationObserver((mutations) => {
+                        mutations.forEach((mutation) => {
+                            mutation.addedNodes.forEach((node) => {
                                 if (node.nodeType === 1) {
-                                    // Look for the date picker container
-                                    let datePickerContainer = null;
-                                    if (node.classList && (node.classList.contains('flatpickr-calendar') || node.querySelector('.flatpickr-calendar'))) {
-                                        datePickerContainer = node.classList.contains('flatpickr-calendar') ? node : node.querySelector('.flatpickr-calendar');
+                                    // Check if this node is a flatpickr calendar
+                                    if (node.classList && node.classList.contains('flatpickr-calendar')) {
+                                        setTimeout(() => addSaveButton(node), 100);
                                     }
-                                    
-                                    if (datePickerContainer) {
-                                        // Find the footer/button container
-                                        let footer = datePickerContainer.querySelector('.flatpickr-footer, .flatpickr-buttons, [class*="footer"], [class*="button"]');
-                                        if (!footer) {
-                                            // Create footer if it doesn't exist
-                                            footer = document.createElement('div');
-                                            footer.className = 'flatpickr-footer flex gap-2 p-3 border-t';
-                                            datePickerContainer.appendChild(footer);
-                                        }
-                                        
-                                        // Check if Save button already exists
-                                        if (!footer.querySelector('.datepicker-save-btn')) {
-                                            // Create Save button
-                                            const saveBtn = document.createElement('button');
-                                            saveBtn.textContent = 'Save';
-                                            saveBtn.className = 'datepicker-save-btn px-4 py-2 rounded font-medium transition-colors';
-                                            saveBtn.style.cssText = 'background-color: #d97706; color: white; border: none; cursor: pointer;';
-                                            saveBtn.type = 'button';
-                                            
-                                            // Hover effect
-                                            saveBtn.addEventListener('mouseenter', function() {
-                                                this.style.backgroundColor = '#b45309';
-                                            });
-                                            saveBtn.addEventListener('mouseleave', function() {
-                                                this.style.backgroundColor = '#d97706';
-                                            });
-                                            
-                                            // Save functionality
-                                            saveBtn.addEventListener('click', function() {
-                                                // Trigger the flatpickr close which will save the selected date
-                                                if (datePickerContainer._flatpickr) {
-                                                    datePickerContainer._flatpickr.close();
-                                                } else {
-                                                    // Fallback: find and click the selected date
-                                                    const selected = datePickerContainer.querySelector('.selected, [aria-selected="true"]');
-                                                    if (selected && !selected.classList.contains('flatpickr-disabled')) {
-                                                        selected.click();
-                                                    }
-                                                    // Close the calendar
-                                                    datePickerContainer.style.display = 'none';
-                                                }
-                                            });
-                                            
-                                            // Add to footer (before Cancel if it exists)
-                                            const cancelBtn = footer.querySelector('button');
-                                            if (cancelBtn) {
-                                                footer.insertBefore(saveBtn, cancelBtn);
-                                            } else {
-                                                footer.appendChild(saveBtn);
-                                            }
-                                        }
+                                    // Check if node contains a flatpickr calendar
+                                    const calendars = node.querySelectorAll && node.querySelectorAll('.flatpickr-calendar');
+                                    if (calendars && calendars.length > 0) {
+                                        calendars.forEach(cal => {
+                                            setTimeout(() => addSaveButton(cal), 100);
+                                        });
                                     }
                                 }
                             });
                         });
                     });
                     
+                    // Start observing
                     observer.observe(document.body, {
                         childList: true,
                         subtree: true
                     });
-                });
+                    
+                    // Also check for existing calendars on load
+                    document.addEventListener('DOMContentLoaded', () => {
+                        setTimeout(() => {
+                            const existingCalendars = document.querySelectorAll('.flatpickr-calendar');
+                            existingCalendars.forEach(cal => addSaveButton(cal));
+                        }, 500);
+                    });
+                })();
             </script>
         """,
     ],

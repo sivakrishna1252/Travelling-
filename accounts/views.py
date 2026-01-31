@@ -231,7 +231,7 @@ class SendOTPView(views.APIView):
 
 #1.Hotel api
 class HotelListView(views.APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]  #[GlobalAuthPermission]
 
     @extend_schema(request=HotelListSerializer, responses={201: dict})
     def post(self, request):
@@ -244,7 +244,7 @@ class HotelListView(views.APIView):
 
 #2.Flight api
 class FlightListView(views.APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]  #[GlobalAuthPermission]
 
     @extend_schema(request=FlightListSerializer, responses={201: dict})
     def post(self, request):
@@ -259,7 +259,7 @@ class FlightListView(views.APIView):
 
 
 class RentalCarListView(views.APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]  #[GlobalAuthPermission]
 
     @extend_schema(request=RentalCarListSerializer, responses={201: dict})
     def post(self, request):
@@ -273,7 +273,7 @@ class RentalCarListView(views.APIView):
 #4.Holiday Package api
 
 class HolidayPackageListView(views.APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]  #[GlobalAuthPermission]
 
     @extend_schema(request=HolidayPackageListSerializer, responses={201: dict})
     def post(self, request):
@@ -287,7 +287,7 @@ class HolidayPackageListView(views.APIView):
 #5.Cruise api
 
 class CruiseListView(views.APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]      #[GlobalAuthPermission]
 
     @extend_schema(request=CruiseListSerializer, responses={201: dict})
     def post(self, request):

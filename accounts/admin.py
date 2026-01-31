@@ -72,13 +72,13 @@ class FlightAdmin(admin.ModelAdmin):
 #rental car
 @admin.register(RentalCar)
 class RentalCarAdmin(admin.ModelAdmin):
-    list_display = ('display_name', 'user_email', 'location', 'pickup_time', 'dropoff_time', 'adults', 'children', 'coupon')
+    list_display = ('display_name', 'user_email', 'location', 'pickup_time', 'dropoff_time', 'coupon')
     list_filter = ('location', 'pickup_time', 'dropoff_time', 'user')
     search_fields = ('location', 'user__email', 'user__first_name', 'user__last_name')
 
     fieldsets = (
         ('Rental Car Details', {
-            'fields': ('user', 'location', 'pickup_time', 'dropoff_time', 'adults', 'children', 'coupon')
+            'fields': ('user', 'location', 'pickup_time', 'dropoff_time', 'coupon')
         }),
     )
 
@@ -90,13 +90,13 @@ class RentalCarAdmin(admin.ModelAdmin):
 #holiday packages
 @admin.register(HolidayPackage)
 class HolidayPackageAdmin(admin.ModelAdmin):
-    list_display = ('display_name', 'user_email', 'to_location', 'from_location', 'duration', 'passengers', 'coupon')
+    list_display = ('display_name', 'user_email', 'to_location', 'from_location', 'duration', 'adults', 'children', 'coupon')
     list_filter = ('to_location', 'from_location', 'duration', 'user')
     search_fields = ('to_location', 'from_location', 'user__email', 'user__first_name', 'user__last_name')
 
     fieldsets = (
         ('Holiday Package Details', {
-            'fields': ('user', 'to_location', 'from_location', 'duration', 'passengers', 'coupon')
+            'fields': ('user', 'to_location', 'from_location', 'duration', 'adults', 'children', 'coupon')
         }),
     )
 
@@ -121,3 +121,5 @@ class CruiseAdmin(admin.ModelAdmin):
     def user_email(self, obj):
         return obj.user.email if obj.user else "Anonymous"
     user_email.short_description = 'User Email'
+
+

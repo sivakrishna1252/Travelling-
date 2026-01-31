@@ -66,7 +66,7 @@ class Hotel(models.Model):
         if not self.coupon or self.coupon.lower() == "string":
             from .models import Flight, RentalCar, HolidayPackage, Cruise
             total = Hotel.objects.count() + Flight.objects.count() + RentalCar.objects.count() + HolidayPackage.objects.count() + Cruise.objects.count()
-            self.coupon = f"Cth0026{1201 + total}"
+            self.coupon = f"CTH0026{1201 + total}"
         super().save(*args, **kwargs)
 
     @property
@@ -100,7 +100,7 @@ class Flight(models.Model):
         if not self.coupon or self.coupon.lower() == "string":
             from .models import Hotel, RentalCar, HolidayPackage, Cruise
             total = Hotel.objects.count() + Flight.objects.count() + RentalCar.objects.count() + HolidayPackage.objects.count() + Cruise.objects.count()
-            self.coupon = f"Cth0026{1201 + total}"
+            self.coupon = f"CTH0026{1201 + total}"
         super().save(*args, **kwargs)
 
 
@@ -124,15 +124,13 @@ class RentalCar(models.Model):
     location = models.CharField(max_length=255)
     pickup_time = models.DateTimeField(null=True, blank=True)
     dropoff_time = models.DateTimeField(null=True, blank=True)
-    adults = models.IntegerField(default=0)
-    children = models.IntegerField(default=0)
     coupon = models.CharField(max_length=50, blank=True, null=True)
 
     def save(self, *args, **kwargs):
         if not self.coupon or self.coupon.lower() == "string":
             from .models import Hotel, Flight, HolidayPackage, Cruise
             total = Hotel.objects.count() + Flight.objects.count() + RentalCar.objects.count() + HolidayPackage.objects.count() + Cruise.objects.count()
-            self.coupon = f"Cth0026{1201 + total}"
+            self.coupon = f"CTH0026{1201 + total}"
         super().save(*args, **kwargs)
 
     @property
@@ -154,14 +152,15 @@ class HolidayPackage(models.Model):
     to_location = models.CharField(max_length=255)
     from_location = models.CharField(max_length=255)
     duration = models.IntegerField()
-    passengers = models.IntegerField(default=1)
+    adults = models.IntegerField(default=0)
+    children = models.IntegerField(default=0)
     coupon = models.CharField(max_length=50, blank=True, null=True)
 
     def save(self, *args, **kwargs):
         if not self.coupon or self.coupon.lower() == "string":
             from .models import Hotel, Flight, RentalCar, Cruise
             total = Hotel.objects.count() + Flight.objects.count() + RentalCar.objects.count() + HolidayPackage.objects.count() + Cruise.objects.count()
-            self.coupon = f"Cth0026{1201 + total}"
+            self.coupon = f"CTH0026{1201 + total}"
         super().save(*args, **kwargs)
 
     @property
@@ -182,7 +181,7 @@ class Cruise(models.Model):
     to_location = models.CharField(max_length=255)
     from_location = models.CharField(max_length=255)
     duration = models.IntegerField()
-    cabins = models.IntegerField()
+    cabins = models.CharField(max_length=255)
     adults = models.IntegerField(default=0)
     children = models.IntegerField(default=0)
     coupon = models.CharField(max_length=50, blank=True, null=True)
@@ -191,7 +190,7 @@ class Cruise(models.Model):
         if not self.coupon or self.coupon.lower() == "string":
             from .models import Hotel, Flight, RentalCar, HolidayPackage
             total = Hotel.objects.count() + Flight.objects.count() + RentalCar.objects.count() + HolidayPackage.objects.count() + Cruise.objects.count()
-            self.coupon = f"Cth0026{1201 + total}"
+            self.coupon = f"CTH0026{1201 + total}"
         super().save(*args, **kwargs)
 
     @property

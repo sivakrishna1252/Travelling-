@@ -37,17 +37,22 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sh '''
-                    . venv/bin/activate
+                script {
+                   withEnv(['JENKINS_NODE_COOKIE=dontKillMe']) {
+                        sh '''
+                        . venv/bin/activate
 
-                    echo "Stopping old server..."
-                    pkill -f runserver || true
+                        echo "Stopping old server..."
+                        pkill -f gunicorn || true
+                        pkill -f runserver || true
 
-                    echo "Starting server on port ${PORT}"
-                    nohup python manage.py runserver 0.0.0.0:${PORT} > server.log 2>&1 &
+                        echo "Starting server on port ${PORT} using gunicorn..."
+                        nohup gunicorn --bind 0.0.0.0:${PORT} traveling.wsgi:application > server.log 2>&1 &
 
-                    echo "Live: http://SERVER_IP:${PORT}"
-                    '''
+                        echo "Live: http://SERVER_IP:${PORT}"
+                        '''
+                   }
+                }
             }
         }
     }

@@ -14,8 +14,7 @@ pipeline {
 
         stage('Setup & Install') {
             steps {
-                dir('traveling') {
-                    sh '''
+                sh '''
                     if [ ! -d "venv" ]; then
                         python3 -m venv venv
                     fi
@@ -24,25 +23,21 @@ pipeline {
                     pip install --upgrade pip
                     pip install -r requirements.txt
                     '''
-                }
             }
         }
 
         stage('Migrate') {
             steps {
-                dir('traveling') {
-                    sh '''
+                sh '''
                     . venv/bin/activate
                     python manage.py migrate
                     '''
-                }
             }
         }
 
         stage('Deploy') {
             steps {
-                dir('traveling') {
-                    sh '''
+                sh '''
                     . venv/bin/activate
 
                     echo "Stopping old server..."
@@ -53,7 +48,6 @@ pipeline {
 
                     echo "Live: http://SERVER_IP:${PORT}"
                     '''
-                }
             }
         }
     }

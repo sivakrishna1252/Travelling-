@@ -18,13 +18,12 @@ from django.contrib import admin
 from django.urls import path, include
 from django.http import JsonResponse
 
-admin.site.site_header = "Travel API"
-admin.site.site_title = "Travel API Portal"
-admin.site.index_title = "Welcome to Travel API Portal"
+admin.site.site_header = "CheapTicket API"
+admin.site.site_title = "CheapTicket Portal"
+admin.site.index_title = "Welcome to CheapTicket Portal"
 
 def home(request):
     return JsonResponse({"message": "Welcome to Traveling App Backend API", "status": "Running"})
-
 
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 

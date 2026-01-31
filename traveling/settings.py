@@ -170,3 +170,302 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 GLOBAL_AUTH_REQUIRED = True
 
+
+from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
+
+def dashboard_callback(request, context):
+    context.update({
+        "subtitle": "Overview",
+        "description": "Welcome to CheapTicket Portal. Here is your daily activity overview.",
+        "custom_style": True,
+        "kpi": [
+            {
+                "title": "Arrivals",
+                "icon": "flight_land",
+                "metric": "54",
+                "footer": "This week",
+                "chart": [10, 20, 15, 30, 20, 54],
+            },
+            {
+                "title": "Departures",
+                "icon": "flight_takeoff",
+                "metric": "12",
+                "footer": "This week",
+                "chart": [5, 5, 10, 8, 12, 12],
+            },
+            {
+                "title": "Total Bookings",
+                "icon": "airplane_ticket",
+                "metric": "1,245",
+                "footer": "+12% Growth",
+            },
+        ],
+    })
+    return context
+
+UNFOLD = {
+    "SITE_TITLE": "CheapTicket Admin",
+    "SITE_HEADER": "CheapTicket Portal",
+    "SITE_URL": "/",
+    "DASHBOARD_CALLBACK": "traveling.settings.dashboard_callback",
+    "SHOW_HISTORY": True,  # Enable Recent actions widget
+    "STYLES": [
+        lambda request: "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap",
+        lambda request: "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0",
+        lambda request: """
+            <style>
+                :root {
+                    --font-family-sans: 'Outfit', sans-serif;
+                }
+                body {
+                    font-family: var(--font-family-sans);
+                    font-size: 16px;
+                }
+                
+                /* Sidebar tweaks */
+                .sidebar-nav-link {
+                    font-size: 0.95rem;
+                    font-weight: 500;
+                }
+
+                /* Table tweaks for professional look */
+                #result_list th {
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    font-size: 0.85rem;
+                }
+                #result_list td {
+                    padding-top: 1rem;
+                    padding-bottom: 1rem;
+                    font-size: 0.95rem;
+                }
+                
+                /* Dashboard cards */
+                .dashboard-card {
+                    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+                    border-radius: 0.75rem;
+                }
+
+                /* Icons for Model List in Dashboard/App Index */
+                /* Target the anchor links in the model list rows */
+                .model-flight a::before, a[href*="/accounts/flight/"]::before { content: "\\e539"; }
+                .model-hotel a::before, a[href*="/accounts/hotel/"]::before { content: "\\e53a"; }
+                .model-cruise a::before, a[href*="/accounts/cruise/"]::before { content: "\\e532"; }
+                .model-rentalcar a::before, a[href*="/accounts/rentalcar/"]::before { content: "\\e531"; }
+                .model-holidaypackage a::before, a[href*="/accounts/holidaypackage/"]::before { content: "\\eb3e"; }
+                .model-customer a::before, a[href*="/accounts/customer/"]::before { content: "\\e87c"; }
+                .model-authuser a::before, a[href*="/auth/authuser/"]::before { content: "\\e7fb"; }
+                
+                /* Common icon style */
+                a[href*="/accounts/"]::before {
+                    font-family: 'Material Symbols Outlined';
+                    font-weight: normal;
+                    font-style: normal;
+                    font-size: 20px;
+                    line-height: 1;
+                    letter-spacing: normal;
+                    text-transform: none;
+                    display: inline-block;
+                    white-space: nowrap;
+                    word-wrap: normal;
+                    direction: ltr;
+                    margin-right: 10px;
+                    vertical-align: middle;
+                    color: #d97706; /* Amber-600 */
+                }
+
+                /* Row Hover Effect to remove dullness */
+                 tr.model-row:hover, .results tr:hover {
+                    background-color: #fef3c7 !important; /* Amber-100 */
+                    transition: background-color 0.2s;
+                }
+                /* Fix for Theme Toggle / User Menu Dropdown Width */
+                div[role="menu"], .group:hover .group-hover\:block {
+                    min-width: 16rem !important;
+                    width: auto !important;
+                }
+                div[role="menu"] a, div[role="menu"] button {
+                    white-space: nowrap;
+                    padding-right: 1.5rem;
+                }
+            </style>
+        """,
+    ],
+    "SCRIPTS": [
+        lambda request: """
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Observe for date picker modals
+                    const observer = new MutationObserver(function(mutations) {
+                        mutations.forEach(function(mutation) {
+                            mutation.addedNodes.forEach(function(node) {
+                                if (node.nodeType === 1) {
+                                    // Look for the date picker container
+                                    let datePickerContainer = null;
+                                    if (node.classList && (node.classList.contains('flatpickr-calendar') || node.querySelector('.flatpickr-calendar'))) {
+                                        datePickerContainer = node.classList.contains('flatpickr-calendar') ? node : node.querySelector('.flatpickr-calendar');
+                                    }
+                                    
+                                    if (datePickerContainer) {
+                                        // Find the footer/button container
+                                        let footer = datePickerContainer.querySelector('.flatpickr-footer, .flatpickr-buttons, [class*="footer"], [class*="button"]');
+                                        if (!footer) {
+                                            // Create footer if it doesn't exist
+                                            footer = document.createElement('div');
+                                            footer.className = 'flatpickr-footer flex gap-2 p-3 border-t';
+                                            datePickerContainer.appendChild(footer);
+                                        }
+                                        
+                                        // Check if Save button already exists
+                                        if (!footer.querySelector('.datepicker-save-btn')) {
+                                            // Create Save button
+                                            const saveBtn = document.createElement('button');
+                                            saveBtn.textContent = 'Save';
+                                            saveBtn.className = 'datepicker-save-btn px-4 py-2 rounded font-medium transition-colors';
+                                            saveBtn.style.cssText = 'background-color: #d97706; color: white; border: none; cursor: pointer;';
+                                            saveBtn.type = 'button';
+                                            
+                                            // Hover effect
+                                            saveBtn.addEventListener('mouseenter', function() {
+                                                this.style.backgroundColor = '#b45309';
+                                            });
+                                            saveBtn.addEventListener('mouseleave', function() {
+                                                this.style.backgroundColor = '#d97706';
+                                            });
+                                            
+                                            // Save functionality
+                                            saveBtn.addEventListener('click', function() {
+                                                // Trigger the flatpickr close which will save the selected date
+                                                if (datePickerContainer._flatpickr) {
+                                                    datePickerContainer._flatpickr.close();
+                                                } else {
+                                                    // Fallback: find and click the selected date
+                                                    const selected = datePickerContainer.querySelector('.selected, [aria-selected="true"]');
+                                                    if (selected && !selected.classList.contains('flatpickr-disabled')) {
+                                                        selected.click();
+                                                    }
+                                                    // Close the calendar
+                                                    datePickerContainer.style.display = 'none';
+                                                }
+                                            });
+                                            
+                                            // Add to footer (before Cancel if it exists)
+                                            const cancelBtn = footer.querySelector('button');
+                                            if (cancelBtn) {
+                                                footer.insertBefore(saveBtn, cancelBtn);
+                                            } else {
+                                                footer.appendChild(saveBtn);
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        });
+                    });
+                    
+                    observer.observe(document.body, {
+                        childList: true,
+                        subtree: true
+                    });
+                });
+            </script>
+        """,
+    ],
+    "COLORS": {
+        "primary": {
+            "50": "255 251 235",
+            "100": "254 243 199",
+            "200": "253 230 138",
+            "300": "252 211 77",
+            "400": "251 191 36",
+            "500": "245 158 11",
+            "600": "217 119 6",
+            "700": "180 83 9",
+            "800": "146 64 14",
+            "900": "120 53 15",
+            "950": "69 26 3",
+        },
+    },
+    "EXTENSIONS": {
+        "modeltranslation": {
+            "flags": {
+                "en": "🇬🇧",
+                "fr": "🇫🇷",
+                "nl": "🇧🇪",
+            },
+        },
+    },
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": False,
+        "navigation": [
+            {
+                "title": _("Main"),
+                "separator": True,
+                "items": [
+                    {
+                        "title": _("Dashboard"),
+                        "icon": "dashboard",
+                        "link": reverse_lazy("admin:index"),
+                    },
+                ],
+            },
+            {
+                "title": _("User Management"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Users"),
+                        "icon": "people",
+                        "link": reverse_lazy("admin:auth_authuser_changelist"),
+                    },
+                    {
+                        "title": _("Groups"),
+                        "icon": "groups",
+                        "link": reverse_lazy("admin:auth_group_changelist"),
+                    },
+                    {
+                        "title": _("Customers"),
+                        "icon": "face",
+                        "link": reverse_lazy("admin:accounts_customer_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Bookings"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Flights"),
+                        "icon": "flight",
+                        "link": reverse_lazy("admin:accounts_flight_changelist"),
+                    },
+                    {
+                        "title": _("Hotels"),
+                        "icon": "hotel",
+                        "link": reverse_lazy("admin:accounts_hotel_changelist"),
+                    },
+                    {
+                        "title": _("Cruises"),
+                        "icon": "directions_boat",
+                        "link": reverse_lazy("admin:accounts_cruise_changelist"),
+                    },
+                    {
+                        "title": _("Rental Cars"),
+                        "icon": "directions_car",
+                        "link": reverse_lazy("admin:accounts_rentalcar_changelist"),
+                    },
+                    {
+                        "title": _("Holiday Packages"),
+                        "icon": "beach_access",
+                        "link": reverse_lazy("admin:accounts_holidaypackage_changelist"),
+                    },
+                ],
+            },
+        ],
+    },
+}

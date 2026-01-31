@@ -37,6 +37,8 @@ class User(AbstractUser):   #customer table in db
     objects = UserManager()
 
     def __str__(self):
+        if self.is_superuser:
+            return "admin:apparatus"
         return self.first_name if self.first_name else self.email
 
 class Customer(User):
@@ -44,6 +46,13 @@ class Customer(User):
         proxy = True
         verbose_name = 'Customer'
         verbose_name_plural = 'Customers'
+
+class AuthUser(User):
+    class Meta:
+        proxy = True
+        app_label = 'auth'
+        verbose_name = 'User'
+        verbose_name_plural = 'Users'
 
 
 
@@ -61,6 +70,7 @@ class Hotel(models.Model):
     adults = models.IntegerField(default=0)
     children = models.IntegerField(default=0)
     rooms = models.IntegerField(default=0)
+    # phone_number = models.ForeignKey(User, on_delete=models.CASCADE, related_name='hotels', null=True, blank=True)
     coupon = models.CharField(max_length=50, blank=True, null=True)
 
     def save(self, *args, **kwargs):

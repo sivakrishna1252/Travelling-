@@ -237,8 +237,10 @@ class HotelListView(views.APIView):
     def post(self, request):
         serializer = HotelListSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user)
-            return Response({'message': 'Hotel search saved successfully', 'data': serializer.data}, status=status.HTTP_201_CREATED)
+            instance = serializer.save(user=request.user)
+            # Re-serialize to include auto-populated fields in response
+            response_serializer = HotelListSerializer(instance)
+            return Response({'message': 'Hotel search saved successfully', 'data': response_serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -250,8 +252,10 @@ class FlightListView(views.APIView):
     def post(self, request):
         serializer = FlightListSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user)
-            return Response({'message': 'Flight search saved successfully', 'data': serializer.data}, status=status.HTTP_201_CREATED)
+            instance = serializer.save(user=request.user)
+            # Re-serialize to include auto-populated fields in response
+            response_serializer = FlightListSerializer(instance)
+            return Response({'message': 'Flight search saved successfully', 'data': response_serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)     
 
 
@@ -265,8 +269,10 @@ class RentalCarListView(views.APIView):
     def post(self, request):
         serializer = RentalCarListSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user)
-            return Response({'message': 'Rental Car search saved successfully', 'data': serializer.data}, status=status.HTTP_201_CREATED)
+            instance = serializer.save(user=request.user)
+            # Re-serialize to include auto-populated fields in response
+            response_serializer = RentalCarListSerializer(instance)
+            return Response({'message': 'Rental Car search saved successfully', 'data': response_serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)     
 
 
@@ -279,8 +285,10 @@ class HolidayPackageListView(views.APIView):
     def post(self, request):
         serializer = HolidayPackageListSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user)
-            return Response({'message': 'Holiday Package search saved successfully', 'data': serializer.data}, status=status.HTTP_201_CREATED)
+            instance = serializer.save(user=request.user)
+            # Re-serialize to include auto-populated fields in response
+            response_serializer = HolidayPackageListSerializer(instance)
+            return Response({'message': 'Holiday Package search saved successfully', 'data': response_serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -293,8 +301,10 @@ class CruiseListView(views.APIView):
     def post(self, request):
         serializer = CruiseListSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user)
-            return Response({'message': 'Cruise search saved successfully', 'data': serializer.data}, status=status.HTTP_201_CREATED)
+            instance = serializer.save(user=request.user)
+            # Re-serialize to include auto-populated fields in response
+            response_serializer = CruiseListSerializer(instance)
+            return Response({'message': 'Cruise search saved successfully', 'data': response_serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

@@ -122,10 +122,10 @@ class TripDisplayMixin:
 
 @admin.register(Hotel)
 class HotelAdmin(ModelAdmin, TripDisplayMixin):
-    list_display = ('display_user_info', 'place', 'checkin_date', 'display_guests', 'display_coupon')
+    list_display = ('display_user_info', 'phone_number', 'place', 'checkin_date', 'display_guests', 'display_coupon')
     list_filter = ('place', 'checkin_date', 'user')
-    search_fields = ('place', 'user__email')
-    fields = ('user', 'place', 'checkin_date', 'checkout_date', 'adults', 'children', 'rooms', 'coupon')
+    search_fields = ('place', 'user__email', 'phone_number')
+    fields = ('user', 'phone_number', 'place', 'checkin_date', 'checkout_date', 'adults', 'children', 'rooms', 'coupon')
 
     @display(description="Guests")
     def display_guests(self, obj):
@@ -134,9 +134,10 @@ class HotelAdmin(ModelAdmin, TripDisplayMixin):
 
 @admin.register(Flight)
 class FlightAdmin(ModelAdmin, TripDisplayMixin):
-    list_display = ('display_user_info', 'display_route', 'departure_date', 'display_type', 'display_coupon')
+    list_display = ('display_user_info', 'phone_number', 'display_route', 'departure_date', 'display_type', 'display_coupon')
     list_filter = ('from_location', 'to_location', 'departure_date', 'round_trip')
-    fields = ('user', 'round_trip', 'one_way', 'from_location', 'to_location', 'departure_date', 'return_date', 'adults', 'children', 'coupon')
+    search_fields = ('from_location', 'to_location', 'user__email', 'phone_number')
+    fields = ('user', 'phone_number', 'round_trip', 'one_way', 'from_location', 'to_location', 'departure_date', 'return_date', 'adults', 'children', 'coupon')
     
     @display(description="Route")
     def display_route(self, obj):
@@ -160,25 +161,25 @@ class FlightAdmin(ModelAdmin, TripDisplayMixin):
 
 @admin.register(RentalCar)
 class RentalCarAdmin(ModelAdmin, TripDisplayMixin):
-    list_display = ('display_user_info', 'location', 'pickup_time', 'dropoff_time', 'display_coupon')
+    list_display = ('display_user_info', 'phone_number', 'location', 'pickup_time', 'dropoff_time', 'display_coupon')
     list_filter = ('location', 'pickup_time', 'dropoff_time', 'user')
-    search_fields = ('location', 'user__email')
-    fields = ('user', 'location', 'pickup_time', 'dropoff_time', 'coupon')
+    search_fields = ('location', 'user__email', 'phone_number')
+    fields = ('user', 'phone_number', 'location', 'pickup_time', 'dropoff_time', 'coupon')
 
 
 @admin.register(HolidayPackage)
 class HolidayPackageAdmin(ModelAdmin, TripDisplayMixin):
-    list_display = ('display_user_info', 'to_location', 'duration', 'display_coupon')
+    list_display = ('display_user_info', 'phone_number', 'to_location', 'duration', 'display_coupon')
     list_filter = ('to_location', 'from_location', 'duration', 'user')
-    search_fields = ('to_location', 'from_location')
-    fields = ('user', 'from_location', 'to_location', 'duration', 'adults', 'children', 'coupon')
+    search_fields = ('to_location', 'from_location', 'user__email', 'phone_number')
+    fields = ('user', 'phone_number', 'from_location', 'to_location', 'duration', 'adults', 'children', 'coupon')
 
 
 @admin.register(Cruise)
 class CruiseAdmin(ModelAdmin, TripDisplayMixin):
-    list_display = ('display_user_info', 'to_location', 'duration', 'cabins', 'display_coupon')
+    list_display = ('display_user_info', 'phone_number', 'to_location', 'duration', 'cabins', 'display_coupon')
     list_filter = ('to_location', 'from_location', 'duration', 'user')
-    search_fields = ('to_location', 'from_location')
-    fields = ('user', 'from_location', 'to_location', 'duration', 'cabins', 'adults', 'children', 'coupon')
+    search_fields = ('to_location', 'from_location', 'user__email', 'phone_number')
+    fields = ('user', 'phone_number', 'from_location', 'to_location', 'duration', 'cabins', 'adults', 'children', 'coupon')
 
 

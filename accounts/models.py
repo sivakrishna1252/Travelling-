@@ -70,10 +70,17 @@ class Hotel(models.Model):
     adults = models.IntegerField(default=0)
     children = models.IntegerField(default=0)
     rooms = models.IntegerField(default=0)
-    # phone_number = models.ForeignKey(User, on_delete=models.CASCADE, related_name='hotels', null=True, blank=True)
+    customer_name = models.CharField(max_length=255, blank=True, null=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
     coupon = models.CharField(max_length=50, blank=True, null=True)
 
     def save(self, *args, **kwargs):
+        if not self.pk and self.user:
+            if not self.customer_name:
+                self.customer_name = self.user.first_name if self.user.first_name else self.user.email
+            if not self.phone_number:
+                self.phone_number = self.user.phone_number
+
         if not self.coupon or self.coupon.lower() == "string":
             from .models import Flight, RentalCar, HolidayPackage, Cruise
             total = Hotel.objects.count() + Flight.objects.count() + RentalCar.objects.count() + HolidayPackage.objects.count() + Cruise.objects.count()
@@ -105,9 +112,17 @@ class Flight(models.Model):
     return_date = models.DateField(null=True, blank=True)
     adults = models.IntegerField(default=0)
     children = models.IntegerField(default=0)
+    customer_name = models.CharField(max_length=255, blank=True, null=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
     coupon = models.CharField(max_length=50, blank=True, null=True)
 
     def save(self, *args, **kwargs):
+        if not self.pk and self.user:
+            if not self.customer_name:
+                self.customer_name = self.user.first_name if self.user.first_name else self.user.email
+            if not self.phone_number:
+                self.phone_number = self.user.phone_number
+
         if not self.coupon or self.coupon.lower() == "string":
             from .models import Hotel, RentalCar, HolidayPackage, Cruise
             total = Hotel.objects.count() + Flight.objects.count() + RentalCar.objects.count() + HolidayPackage.objects.count() + Cruise.objects.count()
@@ -135,9 +150,17 @@ class RentalCar(models.Model):
     location = models.CharField(max_length=255)
     pickup_time = models.DateTimeField(null=True, blank=True)
     dropoff_time = models.DateTimeField(null=True, blank=True)
+    customer_name = models.CharField(max_length=255, blank=True, null=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
     coupon = models.CharField(max_length=50, blank=True, null=True)
 
     def save(self, *args, **kwargs):
+        if not self.pk and self.user:
+            if not self.customer_name:
+                self.customer_name = self.user.first_name if self.user.first_name else self.user.email
+            if not self.phone_number:
+                self.phone_number = self.user.phone_number
+
         if not self.coupon or self.coupon.lower() == "string":
             from .models import Hotel, Flight, HolidayPackage, Cruise
             total = Hotel.objects.count() + Flight.objects.count() + RentalCar.objects.count() + HolidayPackage.objects.count() + Cruise.objects.count()
@@ -165,9 +188,17 @@ class HolidayPackage(models.Model):
     duration = models.IntegerField()
     adults = models.IntegerField(default=0)
     children = models.IntegerField(default=0)
+    customer_name = models.CharField(max_length=255, blank=True, null=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
     coupon = models.CharField(max_length=50, blank=True, null=True)
 
     def save(self, *args, **kwargs):
+        if not self.pk and self.user:
+            if not self.customer_name:
+                self.customer_name = self.user.first_name if self.user.first_name else self.user.email
+            if not self.phone_number:
+                self.phone_number = self.user.phone_number
+
         if not self.coupon or self.coupon.lower() == "string":
             from .models import Hotel, Flight, RentalCar, Cruise
             total = Hotel.objects.count() + Flight.objects.count() + RentalCar.objects.count() + HolidayPackage.objects.count() + Cruise.objects.count()
@@ -195,9 +226,17 @@ class Cruise(models.Model):
     cabins = models.CharField(max_length=255)
     adults = models.IntegerField(default=0)
     children = models.IntegerField(default=0)
+    customer_name = models.CharField(max_length=255, blank=True, null=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
     coupon = models.CharField(max_length=50, blank=True, null=True)
 
     def save(self, *args, **kwargs):
+        if not self.pk and self.user:
+            if not self.customer_name:
+                self.customer_name = self.user.first_name if self.user.first_name else self.user.email
+            if not self.phone_number:
+                self.phone_number = self.user.phone_number
+
         if not self.coupon or self.coupon.lower() == "string":
             from .models import Hotel, Flight, RentalCar, HolidayPackage
             total = Hotel.objects.count() + Flight.objects.count() + RentalCar.objects.count() + HolidayPackage.objects.count() + Cruise.objects.count()

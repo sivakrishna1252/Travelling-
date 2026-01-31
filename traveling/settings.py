@@ -171,6 +171,10 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 GLOBAL_AUTH_REQUIRED = True
 
 
+
+
+
+#unfold admin panel
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 

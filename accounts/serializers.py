@@ -37,12 +37,11 @@ class OTPSerializer(serializers.Serializer):
 #Hotel serializer
 class HotelSerializer(serializers.ModelSerializer):
     user_email = serializers.EmailField(source='user.email', read_only=True)
-    customer_name = serializers.CharField(source='display_name', read_only=True)
 
     class Meta:
         model = Hotel
-        fields = ['id', 'place', 'checkin_date', 'checkout_date', 'adults', 'children', 'rooms', 'customer_name', 'user', 'user_email', 'coupon']
-        read_only_fields = ['user', 'coupon']
+        fields = ['id', 'place', 'checkin_date', 'checkout_date', 'adults', 'children', 'rooms', 'customer_name', 'phone_number', 'user', 'user_email', 'coupon']
+        read_only_fields = ['user', 'coupon', 'customer_name', 'phone_number']
 
 class HotelListSerializer(serializers.ModelSerializer):
     checkin_date = serializers.DateField(help_text="Format: YYYY-MM-DD")
@@ -50,12 +49,11 @@ class HotelListSerializer(serializers.ModelSerializer):
     childrens = serializers.IntegerField(source='children', default=0)
     adults = serializers.IntegerField()
     rooms = serializers.IntegerField()
-    customer_name = serializers.CharField(source='display_name', read_only=True)
 
     class Meta:
         model = Hotel
-        fields = ['customer_name', 'place', 'checkin_date', 'checkout_date', 'adults', 'childrens', 'rooms', 'coupon']
-        read_only_fields = ['coupon']
+        fields = ['customer_name', 'phone_number', 'place', 'checkin_date', 'checkout_date', 'adults', 'childrens', 'rooms', 'coupon']
+        read_only_fields = ['coupon', 'customer_name', 'phone_number']
 
 
 
@@ -63,12 +61,11 @@ class HotelListSerializer(serializers.ModelSerializer):
 
 class FlightSerializer(serializers.ModelSerializer):
     user_email = serializers.EmailField(source='user.email', read_only=True)
-    customer_name = serializers.CharField(source='display_name', read_only=True)
 
     class Meta:
         model = Flight
-        fields = ['id', 'from_location', 'to_location', 'round_trip', 'one_way', 'departure_date', 'return_date', 'adults', 'children', 'user', 'user_email', 'coupon']
-        read_only_fields = ['user', 'coupon']
+        fields = ['id', 'from_location', 'to_location', 'round_trip', 'one_way', 'departure_date', 'return_date', 'adults', 'children', 'customer_name', 'phone_number', 'user', 'user_email', 'coupon']
+        read_only_fields = ['user', 'coupon', 'customer_name', 'phone_number']
 
 
 class FlightListSerializer(serializers.ModelSerializer):
@@ -76,36 +73,32 @@ class FlightListSerializer(serializers.ModelSerializer):
     return_date = serializers.DateField(help_text="Format: YYYY-MM-DD", required=False)
     childrens = serializers.IntegerField(source='children', default=0)
     adults = serializers.IntegerField()
-    customer_name = serializers.CharField(source='display_name', read_only=True)
 
     class Meta:
         model = Flight
-        fields = ['customer_name', 'from_location', 'to_location', 'round_trip', 'one_way', 'departure_date', 'return_date', 'adults', 'childrens', 'coupon']
-        read_only_fields = ['coupon']
+        fields = ['customer_name', 'phone_number', 'from_location', 'to_location', 'round_trip', 'one_way', 'departure_date', 'return_date', 'adults', 'childrens', 'coupon']
+        read_only_fields = ['coupon', 'customer_name', 'phone_number']
 
 
 #Rental Car serializer
 
 class RentalCarSerializer(serializers.ModelSerializer):
     user_email = serializers.EmailField(source='user.email', read_only=True)
-    customer_name = serializers.CharField(source='display_name', read_only=True)
 
     class Meta:
         model = RentalCar
-        fields = ['id', 'location', 'pickup_time', 'dropoff_time', 'user', 'user_email', 'coupon']
-        read_only_fields = ['user', 'coupon']
+        fields = ['id', 'location', 'pickup_time', 'dropoff_time', 'customer_name', 'phone_number', 'user', 'user_email', 'coupon']
+        read_only_fields = ['user', 'coupon', 'customer_name', 'phone_number']
 
 
 class RentalCarListSerializer(serializers.ModelSerializer):
     pickup_time = serializers.DateTimeField(help_text="Format: YYYY-MM-DD HH:MM:SS")
     dropoff_time = serializers.DateTimeField(help_text="Format: YYYY-MM-DD HH:MM:SS")
   
-    customer_name = serializers.CharField(source='display_name', read_only=True)
-
     class Meta:
         model = RentalCar
-        fields = ['customer_name', 'location', 'pickup_time', 'dropoff_time',  'coupon']
-        read_only_fields = ['coupon']
+        fields = ['customer_name', 'phone_number', 'location', 'pickup_time', 'dropoff_time',  'coupon']
+        read_only_fields = ['coupon', 'customer_name', 'phone_number']
 
 
 
@@ -113,35 +106,32 @@ class RentalCarListSerializer(serializers.ModelSerializer):
 
 class HolidayPackageSerializer(serializers.ModelSerializer):
     user_email = serializers.EmailField(source='user.email', read_only=True)
-    customer_name = serializers.CharField(source='display_name', read_only=True)
 
     class Meta:
         model = HolidayPackage
-        fields = ['id', 'to_location', 'from_location', 'duration', 'adults', 'children', 'user', 'user_email', 'coupon']
-        read_only_fields = ['user', 'coupon']
+        fields = ['id', 'to_location', 'from_location', 'duration', 'adults', 'children', 'customer_name', 'phone_number', 'user', 'user_email', 'coupon']
+        read_only_fields = ['user', 'coupon', 'customer_name', 'phone_number']
 
 
 class HolidayPackageListSerializer(serializers.ModelSerializer):
     duration = serializers.IntegerField()
     adults = serializers.IntegerField()
     children = serializers.IntegerField()
-    customer_name = serializers.CharField(source='display_name', read_only=True)
 
     class Meta:
         model = HolidayPackage
-        fields = ['customer_name', 'to_location', 'from_location', 'duration', 'adults', 'children', 'coupon']
-        read_only_fields = ['coupon']
+        fields = ['customer_name', 'phone_number', 'to_location', 'from_location', 'duration', 'adults', 'children', 'coupon']
+        read_only_fields = ['coupon', 'customer_name', 'phone_number']
 
 
 #Cruise serializer
 class CruiseSerializer(serializers.ModelSerializer):
     user_email = serializers.EmailField(source='user.email', read_only=True)
-    customer_name = serializers.CharField(source='display_name', read_only=True)
 
     class Meta:
         model = Cruise
-        fields = ['id', 'to_location', 'from_location', 'duration', 'cabins', 'adults', 'children', 'user', 'user_email', 'coupon']
-        read_only_fields = ['user', 'coupon']
+        fields = ['id', 'to_location', 'from_location', 'duration', 'cabins', 'adults', 'children', 'customer_name', 'phone_number', 'user', 'user_email', 'coupon']
+        read_only_fields = ['user', 'coupon', 'customer_name', 'phone_number']
 
 
 class CruiseListSerializer(serializers.ModelSerializer):
@@ -149,9 +139,8 @@ class CruiseListSerializer(serializers.ModelSerializer):
     cabins = serializers.CharField()
     adults = serializers.IntegerField()
     childrens = serializers.IntegerField(source='children', default=0)
-    customer_name = serializers.CharField(source='display_name', read_only=True)
 
     class Meta:
         model = Cruise
-        fields = ['customer_name', 'to_location', 'from_location', 'duration', 'cabins', 'adults', 'childrens', 'coupon']
-        read_only_fields = ['coupon']
+        fields = ['customer_name', 'phone_number', 'to_location', 'from_location', 'duration', 'cabins', 'adults', 'childrens', 'coupon']
+        read_only_fields = ['coupon', 'customer_name', 'phone_number']

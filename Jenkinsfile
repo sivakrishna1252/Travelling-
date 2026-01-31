@@ -31,6 +31,9 @@ pipeline {
                 sh '''
                     . venv/bin/activate
                     
+                    echo "Collecting static files..."
+                    python manage.py collectstatic --noinput
+
                     echo "Making migrations..."
                     python manage.py makemigrations --noinput
                     

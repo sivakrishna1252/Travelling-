@@ -41,11 +41,12 @@ class HotelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Hotel
-        fields = ['id', 'place', 'date', 'adults', 'children', 'rooms', 'customer_name', 'user', 'user_email', 'coupon']
+        fields = ['id', 'place', 'checkin_date', 'checkout_date', 'adults', 'children', 'rooms', 'customer_name', 'user', 'user_email', 'coupon']
         read_only_fields = ['user', 'coupon']
 
 class HotelListSerializer(serializers.ModelSerializer):
-    date = serializers.DateField(help_text="Format: YYYY-MM-DD")
+    checkin_date = serializers.DateField(help_text="Format: YYYY-MM-DD")
+    checkout_date = serializers.DateField(help_text="Format: YYYY-MM-DD")
     childrens = serializers.IntegerField(source='children', default=0)
     adults = serializers.IntegerField()
     rooms = serializers.IntegerField()
@@ -53,7 +54,7 @@ class HotelListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Hotel
-        fields = ['customer_name', 'place', 'date', 'adults', 'childrens', 'rooms', 'coupon']
+        fields = ['customer_name', 'place', 'checkin_date', 'checkout_date', 'adults', 'childrens', 'rooms', 'coupon']
         read_only_fields = ['coupon']
 
 

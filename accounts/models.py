@@ -56,7 +56,8 @@ class Customer(User):
 class Hotel(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='hotels', null=True, blank=True)
     place = models.CharField(max_length=255)
-    date = models.DateField(null=True, blank=True)
+    checkin_date = models.DateField(null=True, blank=True)
+    checkout_date = models.DateField(null=True, blank=True)
     adults = models.IntegerField(default=0)
     children = models.IntegerField(default=0)
     rooms = models.IntegerField(default=0)

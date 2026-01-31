@@ -36,9 +36,6 @@ pipeline {
                     
                     echo "Applying migrations..."
                     python manage.py migrate --noinput
-                    
-                    echo "Creating superuser if not exists..."
-                    python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@example.com', 'admin@123')"
                 '''
             }
         }
@@ -50,9 +47,10 @@ pipeline {
                         sh '''
                         . venv/bin/activate
 
-                        echo "Stopping old server..."
+                        echo "Stopping old processes..."
                         pkill -f gunicorn || true
                         pkill -f runserver || true
+                        pkill -f celery || true
 
                         echo "Starting server on port ${PORT} using gunicorn..."
                         nohup gunicorn --bind 0.0.0.0:${PORT} traveling.wsgi:application > server.log 2>&1 &

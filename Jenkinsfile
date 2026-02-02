@@ -31,6 +31,9 @@ pipeline {
                 sh '''
                     . venv/bin/activate
                     
+                    # Remove stale migration if it exists (fixes Jenkins build failure)
+                    rm -f accounts/migrations/0021_remove_hotel_date_hotel_checkin_date_and_more.py
+
                     echo "Collecting static files..."
                     python manage.py collectstatic --noinput
 

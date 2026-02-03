@@ -8,8 +8,8 @@ from django.contrib.auth import authenticate, get_user_model
 from drf_spectacular.utils import extend_schema
 from .models import Hotel, Flight
 from .serializers import (
-    UserRegisterSerializer, UserProfileSerializer, VerifyOTPSerializer, 
-    UserLoginSerializer, ResetPasswordSerializer, OTPSerializer,
+    UserProfileSerializer, VerifyOTPSerializer, 
+    ResetPasswordSerializer, OTPSerializer,
     HotelListSerializer, FlightListSerializer, RentalCarListSerializer, HolidayPackageListSerializer, CruiseListSerializer
 )
 
@@ -31,45 +31,32 @@ def get_tokens_for_user(user):
 
 
 
-#register
-class RegisterView(views.APIView):
+# 1. Send OTP (Unified for Signup/Signin)
+class SendOTPView(views.APIView):
     permission_classes = [permissions.AllowAny]
 
-    @extend_schema(request=UserRegisterSerializer, responses={200: dict})
+    @extend_schema(request=OTPSerializer, responses={200: dict})
     def post(self, request):
-        serializer = UserRegisterSerializer(data=request.data)
+        serializer = OTPSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data['email']
-            first_name = serializer.validated_data['first_name']
-            last_name = serializer.validated_data['last_name']
-            phone_number = serializer.validated_data['phone_number']
-            address = serializer.validated_data['address']
-            
             otp = str(random.randint(100000, 999999))
             
             user, created = User.objects.get_or_create(email=email)
-            user.first_name = first_name
-            user.last_name = last_name
-            user.phone_number = phone_number
-            user.address = address
             user.otp = otp
-            user.is_onboarding_completed = False # Still needs to verify OTP
             user.save()
 
             send_mail(
-                'Verify Your Registration',
-                f'Your OTP for registration is {otp}',
+                'Your OTP Code',
+                f'Your OTP code is {otp}',
                 settings.EMAIL_HOST_USER,
                 [email],
                 fail_silently=False,
             )
-            return Response({'message': 'OTP sent to your email. Please verify to complete registration.'}, status=status.HTTP_200_OK)
+            return Response({'message': 'OTP sent successfully'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-
-
-#verify otp
+# 2. Verify OTP
 class VerifyOTPView(views.APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -79,6 +66,7 @@ class VerifyOTPView(views.APIView):
         if serializer.is_valid():
             otp = serializer.validated_data['otp']
             try:
+                # Finding user by OTP only as requested
                 user = User.objects.get(otp=otp)
                 user.is_email_verified = True
                 user.otp = None
@@ -91,12 +79,10 @@ class VerifyOTPView(views.APIView):
                     'is_onboarding_completed': user.is_onboarding_completed
                 }, status=status.HTTP_200_OK)
             except User.DoesNotExist:
-                return Response({'error': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
-            except User.MultipleObjectsReturned:
-                return Response({'error': 'Internal error: Multiple users with same OTP. Please request a new OTP.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response({'error': 'Invalid OTP or Email'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#complete onboarding
+# 3. Complete Onboarding
 class CompleteOnboardingView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -108,66 +94,13 @@ class CompleteOnboardingView(views.APIView):
             user.first_name = serializer.validated_data['first_name']
             user.last_name = serializer.validated_data['last_name']
             user.phone_number = serializer.validated_data['phone_number']
-            user.address = serializer.validated_data['address']
+            user.address = serializer.validated_data.get('address', user.address)
             user.is_onboarding_completed = True
             user.save()
-            return Response({'message': 'Profile updated successfully', 'is_onboarding_completed': user.is_onboarding_completed}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-#send otp for login
-class LoginOTPView(views.APIView):
-    permission_classes = [permissions.AllowAny]
-
-    @extend_schema(request=OTPSerializer, responses={200: dict})
-    def post(self, request):
-        serializer = OTPSerializer(data=request.data)
-        if serializer.is_valid():
-            email = serializer.validated_data['email']
-            try:
-                user = User.objects.get(email=email)
-                otp = str(random.randint(100000, 999999))
-                user.otp = otp
-                user.save()
-
-                send_mail(
-                    'Login OTP',
-                    f'Your OTP for login is {otp}',
-                    settings.EMAIL_HOST_USER,
-                    [email],
-                    fail_silently=False,
-                )
-                return Response({'message': 'OTP sent to your email.'}, status=status.HTTP_200_OK)
-            except User.DoesNotExist:
-                return Response({'error': 'User with this email does not exist'}, status=status.HTTP_404_NOT_FOUND)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-#login with email and otp
-class LoginView(views.APIView):
-    permission_classes = [permissions.AllowAny]
-
-    @extend_schema(request=UserLoginSerializer, responses={200: dict})
-    def post(self, request):
-        serializer = UserLoginSerializer(data=request.data)
-        if serializer.is_valid():
-            otp = serializer.validated_data['otp']
-            try:
-                user = User.objects.get(otp=otp)
-                user.otp = None
-                user.save()
-                
-                tokens = get_tokens_for_user(user)
-                return Response({
-                    'message': 'Login successful.',
-                    'tokens': tokens,
-                    'is_onboarding_completed': user.is_onboarding_completed
-                }, status=status.HTTP_200_OK)
-            except User.DoesNotExist:
-                return Response({'error': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
-            except User.MultipleObjectsReturned:
-                return Response({'error': 'Internal error: Multiple users with same OTP. Please request a new OTP.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({
+                'message': 'Profile updated successfully', 
+                'is_onboarding_completed': user.is_onboarding_completed
+            }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

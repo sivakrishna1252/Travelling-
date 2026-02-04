@@ -66,18 +66,30 @@ class VerifyOTPView(views.APIView):
         if serializer.is_valid():
             otp = serializer.validated_data['otp']
             try:
-                # Finding user by OTP only as requested
+                # Finding user by OTP
                 user = User.objects.get(otp=otp)
                 user.is_email_verified = True
                 user.otp = None
                 user.save()
                 
                 tokens = get_tokens_for_user(user)
-                return Response({
+                response_data = {
                     'message': 'OTP verified successfully.',
                     'tokens': tokens,
                     'is_onboarding_completed': user.is_onboarding_completed
-                }, status=status.HTTP_200_OK)
+                }
+
+                # If onboarding is completed, include user details
+                if user.is_onboarding_completed:
+                    response_data['user_details'] = {
+                        'first_name': user.first_name,
+                        'last_name': user.last_name,
+                        'phone_number': user.phone_number,
+                        'address': user.address,
+                        'email': user.email
+                    }
+
+                return Response(response_data, status=status.HTTP_200_OK)
             except User.DoesNotExist:
                 return Response({'error': 'Invalid OTP or Email'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -130,33 +142,6 @@ class ForgotPasswordView(views.APIView):
 
 
 
-
-
-
-#send otp for forgot password
-class SendOTPView(views.APIView):
-    permission_classes = [permissions.AllowAny]
-
-    @extend_schema(request=OTPSerializer, responses={200: dict})
-    def post(self, request):
-        serializer = OTPSerializer(data=request.data)
-        if serializer.is_valid():
-            email = serializer.validated_data['email']
-            otp = str(random.randint(100000, 999999))
-            
-            user, created = User.objects.get_or_create(email=email)
-            user.otp = otp
-            user.save()
-
-            send_mail(
-                'Your OTP Code',
-                f'Your OTP code is {otp}',
-                settings.EMAIL_HOST_USER,
-                [email],
-                fail_silently=False,
-            )
-            return Response({'message': 'OTP sent successfully'}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 

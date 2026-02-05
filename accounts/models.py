@@ -26,6 +26,7 @@ class User(AbstractUser):   #customer table in db
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     otp = models.CharField(max_length=6, blank=True, null=True)
+    otp_created_at = models.DateTimeField(blank=True, null=True)
     is_onboarding_completed = models.BooleanField(default=False)
     is_auth_required = models.BooleanField(default=True)
     is_email_verified = models.BooleanField(default=False)
@@ -53,12 +54,20 @@ class AuthUser(User):
         app_label = 'auth'
         verbose_name = 'User'
         verbose_name_plural = 'Users'
+class OTPLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='otp_logs', null=True, blank=True)
+    phone_number = models.CharField(max_length=15)
+    otp_code = models.CharField(max_length=6)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_successful = models.BooleanField(default=False)
 
+    def __str__(self):
+        return f"OTP {self.otp_code} for {self.phone_number} at {self.timestamp} - {'Success' if self.is_successful else 'Failed'}"
 
-
-
-
-#CRUD api's of HOTEL,FLIGTH,RENTALCARS,HOLIDAYPACKAGES,CRUISES
+    class Meta:
+        verbose_name = "OTP Log"
+        verbose_name_plural = "OTP Logs"
+        ordering = ['-timestamp']
 
 
 #hotel table in db

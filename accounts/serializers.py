@@ -9,12 +9,20 @@ class UserRegisterSerializer(serializers.Serializer):
     address = serializers.CharField()
 
 class UserProfileSerializer(serializers.Serializer):
-    first_name = serializers.CharField(max_length=100)
-    last_name = serializers.CharField(max_length=100)
-    phone_number = serializers.CharField(max_length=15)
-    address = serializers.CharField(required=False, allow_blank=True)
+    first_name = serializers.CharField(max_length=50, required=True, allow_blank=False)
+    last_name = serializers.CharField(max_length=50, required=True, allow_blank=False)
+    phone_number = serializers.CharField(max_length=15, required=True, allow_blank=False)
+    address = serializers.CharField(required=True, allow_blank=False)
+
+    def validate_phone_number(self, value):
+        if not value.isdigit():
+            raise serializers.ValidationError("Phone number must contain only digits.")
+        if len(value) < 10 or len(value) > 15:
+            raise serializers.ValidationError("Phone number must be between 10 and 15 digits.")
+        return value
 
 class VerifyOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField()
     otp = serializers.CharField(max_length=6)
 
 class UserLoginSerializer(serializers.Serializer):
@@ -43,16 +51,31 @@ class HotelSerializer(serializers.ModelSerializer):
         read_only_fields = ['user', 'coupon', 'customer_name', 'phone_number']
 
 class HotelListSerializer(serializers.ModelSerializer):
-    checkin_date = serializers.DateField(help_text="Format: YYYY-MM-DD")
-    checkout_date = serializers.DateField(help_text="Format: YYYY-MM-DD")
+    checkin_date = serializers.DateField(required=True, help_text="Format: YYYY-MM-DD")
+    checkout_date = serializers.DateField(required=True, help_text="Format: YYYY-MM-DD")
     childrens = serializers.IntegerField(source='children', default=0)
-    adults = serializers.IntegerField()
-    rooms = serializers.IntegerField()
+    adults = serializers.IntegerField(default=0)
+    rooms = serializers.IntegerField(default=0)
+    place = serializers.CharField(required=True)
 
     class Meta:
         model = Hotel
         fields = ['customer_name', 'phone_number', 'place', 'checkin_date', 'checkout_date', 'adults', 'childrens', 'rooms', 'coupon']
         read_only_fields = ['coupon', 'customer_name', 'phone_number']
+
+    def validate(self, data):
+        # Mandatory traveler check
+        adults = data.get('adults', 0)
+        children = data.get('children', 0)
+        if adults == 0 and children == 0:
+            raise serializers.ValidationError("Either adults or children must be at least 1.")
+        
+        # Explicit Room Check (prevent default 0)
+        rooms = data.get('rooms', 0)
+        if rooms < 1:
+            raise serializers.ValidationError({"rooms": "Please select at least 1 room."})
+            
+        return data
 
 
 
@@ -68,15 +91,44 @@ class FlightSerializer(serializers.ModelSerializer):
 
 
 class FlightListSerializer(serializers.ModelSerializer):
+    from_location = serializers.CharField(required=True)
+    to_location = serializers.CharField(required=True)
     departure_date = serializers.DateField(help_text="Format: YYYY-MM-DD", required=False)
     return_date = serializers.DateField(help_text="Format: YYYY-MM-DD", required=False)
     childrens = serializers.IntegerField(source='children', default=0)
-    adults = serializers.IntegerField()
+    adults = serializers.IntegerField(default=0)
 
     class Meta:
         model = Flight
         fields = ['customer_name', 'phone_number', 'from_location', 'to_location', 'round_trip', 'one_way', 'departure_date', 'return_date', 'adults', 'childrens', 'coupon']
         read_only_fields = ['coupon', 'customer_name', 'phone_number']
+
+    def validate(self, data):
+        # Mandatory traveler check
+        adults = data.get('adults', 0)
+        children = data.get('children', 0)
+        if adults == 0 and children == 0:
+            raise serializers.ValidationError("Either adults or children must be at least 1.")
+
+        # Trip type mutual exclusivity
+        round_trip = data.get('round_trip', False)
+        one_way = data.get('one_way', False)
+        if round_trip and one_way:
+            raise serializers.ValidationError("Please select either One Way or Round Trip, not both.")
+        if not round_trip and not one_way:
+            raise serializers.ValidationError("Please select either One Way or Round Trip.")
+
+        # Trip logic
+        departure_date = data.get('departure_date')
+        return_date = data.get('return_date')
+
+        if not departure_date:
+            raise serializers.ValidationError({"departure_date": "Departure date is required."})
+
+        if round_trip and not return_date:
+            raise serializers.ValidationError({"return_date": "Return date is required for round trips."})
+
+        return data
 
 
 #Rental Car serializer
@@ -91,8 +143,9 @@ class RentalCarSerializer(serializers.ModelSerializer):
 
 
 class RentalCarListSerializer(serializers.ModelSerializer):
-    pickup_time = serializers.DateTimeField(help_text="Format: YYYY-MM-DD HH:MM:SS")
-    dropoff_time = serializers.DateTimeField(help_text="Format: YYYY-MM-DD HH:MM:SS")
+    location = serializers.CharField(required=True)
+    pickup_time = serializers.DateTimeField(required=True, help_text="Format: YYYY-MM-DD HH:MM:SS")
+    dropoff_time = serializers.DateTimeField(required=True, help_text="Format: YYYY-MM-DD HH:MM:SS")
   
     class Meta:
         model = RentalCar
@@ -113,14 +166,30 @@ class HolidayPackageSerializer(serializers.ModelSerializer):
 
 
 class HolidayPackageListSerializer(serializers.ModelSerializer):
-    duration = serializers.IntegerField()
-    adults = serializers.IntegerField()
-    children = serializers.IntegerField()
+    to_location = serializers.CharField(required=True)
+    from_location = serializers.CharField(required=True)
+    duration = serializers.IntegerField(default=0)
+    adults = serializers.IntegerField(default=0)
+    children = serializers.IntegerField(default=0)
 
     class Meta:
         model = HolidayPackage
         fields = ['customer_name', 'phone_number', 'to_location', 'from_location', 'duration', 'adults', 'children', 'coupon']
         read_only_fields = ['coupon', 'customer_name', 'phone_number']
+
+    def validate(self, data):
+        # Mandatory traveler check
+        adults = data.get('adults', 0)
+        children = data.get('children', 0)
+        if adults == 0 and children == 0:
+            raise serializers.ValidationError("Either adults or children must be at least 1.")
+        
+        # Explicit Duration Check
+        duration = data.get('duration', 0)
+        if duration < 1:
+            raise serializers.ValidationError({"duration": "Duration must be at least 1 day."})
+
+        return data
 
 
 #Cruise serializer
@@ -134,12 +203,28 @@ class CruiseSerializer(serializers.ModelSerializer):
 
 
 class CruiseListSerializer(serializers.ModelSerializer):
-    duration = serializers.IntegerField()
-    cabins = serializers.CharField()
-    adults = serializers.IntegerField()
+    to_location = serializers.CharField(required=True)
+    from_location = serializers.CharField(required=True)
+    duration = serializers.IntegerField(default=0)
+    cabins = serializers.CharField(required=True, allow_blank=False)
+    adults = serializers.IntegerField(default=0)
     childrens = serializers.IntegerField(source='children', default=0)
 
     class Meta:
         model = Cruise
         fields = ['customer_name', 'phone_number', 'to_location', 'from_location', 'duration', 'cabins', 'adults', 'childrens', 'coupon']
         read_only_fields = ['coupon', 'customer_name', 'phone_number']
+
+    def validate(self, data):
+        # Mandatory traveler check
+        adults = data.get('adults', 0)
+        children = data.get('children', 0)
+        if adults == 0 and children == 0:
+            raise serializers.ValidationError("Either adults or children must be at least 1.")
+        
+        # Explicit Duration Check
+        duration = data.get('duration', 0)
+        if duration < 1:
+            raise serializers.ValidationError({"duration": "Duration must be at least 1 day."})
+            
+        return data

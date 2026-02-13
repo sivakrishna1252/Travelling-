@@ -215,7 +215,7 @@ class HotelListView(views.APIView):
                     subject,
                     message,
                     settings.EMAIL_HOST_USER,
-                    [request.user.email],
+                    ['support@cheaptickethub.com'],
                     fail_silently=True,
                 )
             except Exception:
@@ -245,7 +245,7 @@ class FlightListView(views.APIView):
                     subject,
                     message,
                     settings.EMAIL_HOST_USER,
-                    [request.user.email],
+                    ['support@cheaptickethub.com'],
                     fail_silently=True,
                 )
             except Exception:
@@ -274,7 +274,7 @@ class RentalCarListView(views.APIView):
                     subject,
                     message,
                     settings.EMAIL_HOST_USER,
-                    [request.user.email],
+                    ['support@cheaptickethub.com'],
                     fail_silently=True,
                 )
             except Exception:
@@ -303,7 +303,7 @@ class HolidayPackageListView(views.APIView):
                     subject,
                     message,
                     settings.EMAIL_HOST_USER,
-                    [request.user.email],
+                    ['support@cheaptickethub.com'],
                     fail_silently=True,
                 )
             except Exception:
@@ -332,7 +332,7 @@ class CruiseListView(views.APIView):
                     subject,
                     message,
                     settings.EMAIL_HOST_USER,
-                    [request.user.email],
+                    ['support@cheaptickethub.com'],
                     fail_silently=True,
                 )
             except Exception:
@@ -364,7 +364,7 @@ class MultiCityFlightListView(views.APIView):
                     subject,
                     message,
                     settings.EMAIL_HOST_USER,
-                    [request.user.email],
+                    ['support@cheaptickethub.com'],
                     fail_silently=True,
                 )
             except Exception as e:

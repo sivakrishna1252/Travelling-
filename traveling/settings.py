@@ -168,7 +168,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'apparatusasmail@gmail.com'
 EMAIL_HOST_PASSWORD = 'pmmf fbvk kypp flqg'
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = 'support@cheaptickethub.com'
 
 
 

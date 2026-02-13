@@ -204,6 +204,13 @@ def dashboard_callback(request, context):
                 "metric": "1,245",
                 "footer": "+12% Growth",
             },
+            {
+                "title": "Multi-City Flights",
+                "icon": "vibration",
+                "metric": "18",
+                "footer": "This month",
+            },
+
         ],
     })
     return context
@@ -255,7 +262,9 @@ UNFOLD = {
                 /* Icons for Model List in Dashboard/App Index */
                 /* Target the anchor links in the model list rows */
                 .model-flight a::before, a[href*="/accounts/flight/"]::before { content: "\\e539"; }
+                .model-multicityflight a::before, a[href*="/accounts/multicityflight/"]::before { content: "\\e539"; }
                 .model-hotel a::before, a[href*="/accounts/hotel/"]::before { content: "\\e53a"; }
+
                 .model-cruise a::before, a[href*="/accounts/cruise/"]::before { content: "\\e532"; }
                 .model-rentalcar a::before, a[href*="/accounts/rentalcar/"]::before { content: "\\e531"; }
                 .model-holidaypackage a::before, a[href*="/accounts/holidaypackage/"]::before { content: "\\eb3e"; }
@@ -482,6 +491,12 @@ UNFOLD = {
                         "icon": "flight",
                         "link": reverse_lazy("admin:accounts_flight_changelist"),
                     },
+                    {
+                        "title": _("Multi-City Flights"),
+                        "icon": "flight_takeoff",
+                        "link": reverse_lazy("admin:accounts_multicityflight_changelist"),
+                    },
+
                     {
                         "title": _("Hotels"),
                         "icon": "hotel",

@@ -150,6 +150,7 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'API for Traveling Application with OTP and Auth',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.IsAdminUser'],
 }
 
 

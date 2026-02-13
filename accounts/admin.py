@@ -8,7 +8,9 @@ from unfold.decorators import display
 from unfold.forms import AdminPasswordChangeForm, UserChangeForm, UserCreationForm
 from unfold.widgets import UnfoldAdminTextInputWidget, UnfoldAdminEmailInputWidget, UnfoldAdminTextareaWidget
 
-from .models import User, Customer, Hotel, Flight, RentalCar, HolidayPackage, Cruise, AuthUser, OTPLog
+from .models import User, Customer, Hotel, Flight, RentalCar, HolidayPackage, Cruise, AuthUser, OTPLog, MultiCityFlight, MultiCityFlightLeg
+
+
 
 # --- Custom Forms ---
 
@@ -243,6 +245,23 @@ class CruiseAdmin(ModelAdmin, TripDisplayMixin):
     list_filter = ('to_location', 'from_location', 'duration', 'user')
     search_fields = ('to_location', 'from_location', 'user__email', 'phone_number')
     fields = ('user', 'phone_number', 'from_location', 'to_location', 'duration', 'cabins', 'adults', 'children', 'coupon')
+
+class MultiCityFlightLegInline(admin.TabularInline):
+    model = MultiCityFlightLeg
+    extra = 1
+
+@admin.register(MultiCityFlight)
+class MultiCityFlightAdmin(ModelAdmin, TripDisplayMixin):
+    list_display = ('display_user_info', 'phone_number', 'display_legs_count', 'display_coupon', 'created_at')
+    list_filter = ('created_at', 'user')
+    search_fields = ('user__email', 'phone_number', 'customer_name')
+    inlines = [MultiCityFlightLegInline]
+    fields = ('user', 'customer_name', 'phone_number', 'adults', 'children', 'coupon')
+
+    @display(description="Legs Count")
+    def display_legs_count(self, obj):
+        return obj.legs.count()
+
 
 @admin.register(OTPLog)
 class OTPLogAdmin(ModelAdmin):

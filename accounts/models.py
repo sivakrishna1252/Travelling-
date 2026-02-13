@@ -262,3 +262,37 @@ class Cruise(models.Model):
 
     def __str__(self):
         return f"Cruise Search at {self.to_location} to {self.from_location} by {self.display_name} for {self.duration} days"        
+# MULTI-CITY FLIGHTS
+class MultiCityFlight(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='multi_city_flights', null=True, blank=True)
+    adults = models.IntegerField(default=0)
+    children = models.IntegerField(default=0)
+    customer_name = models.CharField(max_length=255, blank=True, null=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    coupon = models.CharField(max_length=50, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.pk and self.user:
+            if not self.customer_name:
+                self.customer_name = self.user.first_name if self.user.first_name else self.user.email
+            if not self.phone_number:
+                self.phone_number = self.user.phone_number
+
+        if not self.coupon or self.coupon.lower() == "string":
+            from .models import Hotel, Flight, RentalCar, HolidayPackage, Cruise
+            total = Hotel.objects.count() + Flight.objects.count() + RentalCar.objects.count() + HolidayPackage.objects.count() + Cruise.objects.count() + MultiCityFlight.objects.count()
+            self.coupon = f"CTH0026{1201 + total}"
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Multi-City Flight Search by {self.customer_name or 'Anonymous'}"
+
+class MultiCityFlightLeg(models.Model):
+    multi_city_flight = models.ForeignKey(MultiCityFlight, on_delete=models.CASCADE, related_name='legs')
+    from_location = models.CharField(max_length=255)
+    to_location = models.CharField(max_length=255)
+    departure_date = models.DateField()
+
+    def __str__(self):
+        return f"Leg: {self.from_location} to {self.to_location} on {self.departure_date}"

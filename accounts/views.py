@@ -8,12 +8,14 @@ from django.contrib.auth import authenticate, get_user_model
 from django.utils import timezone
 from datetime import timedelta
 from drf_spectacular.utils import extend_schema
-from .models import Hotel, Flight, OTPLog
+from .models import Hotel, Flight, OTPLog, MultiCityFlight
 from .serializers import (
     UserProfileSerializer, VerifyOTPSerializer, 
     ResetPasswordSerializer, OTPSerializer,
-    HotelListSerializer, FlightListSerializer, RentalCarListSerializer, HolidayPackageListSerializer, CruiseListSerializer
+    HotelListSerializer, FlightListSerializer, RentalCarListSerializer, HolidayPackageListSerializer, CruiseListSerializer,
+    MultiCityFlightSerializer
 )
+
 
 User = get_user_model()
 
@@ -203,9 +205,26 @@ class HotelListView(views.APIView):
         serializer = HotelListSerializer(data=request.data)
         if serializer.is_valid():
             instance = serializer.save(user=request.user)
+            
+            # --- Email Notification ---
+            subject = 'Hotel Search Confirmation'
+            message = f"Hello {instance.customer_name},\n\nYour hotel search at {instance.place} has been saved.\nCheck-in: {instance.checkin_date}\nCheck-out: {instance.checkout_date}\n\nCoupon Code: {instance.coupon}\n\nThank you for choosing CheapTicket!"
+            
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    settings.EMAIL_HOST_USER,
+                    [request.user.email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
+
             response_serializer = HotelListSerializer(instance)
             return Response({'message': 'Hotel search saved successfully', 'data': response_serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class FlightListView(views.APIView):
     permission_classes = [permissions.IsAuthenticated, IsOnboardingCompletedPermission]
@@ -215,9 +234,27 @@ class FlightListView(views.APIView):
         serializer = FlightListSerializer(data=request.data)
         if serializer.is_valid():
             instance = serializer.save(user=request.user)
+            
+            # --- Email Notification ---
+            subject = 'Flight Search Confirmation'
+            trip_type = "Round Trip" if instance.round_trip else "One Way"
+            message = f"Hello {instance.customer_name},\n\nYour flight search has been saved.\n\nFlight Details:\n{instance.from_location} to {instance.to_location}\nDeparture: {instance.departure_date}\nType: {trip_type}\n\nCoupon Code: {instance.coupon}\n\nThank you for choosing CheapTicket!"
+            
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    settings.EMAIL_HOST_USER,
+                    [request.user.email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
+
             response_serializer = FlightListSerializer(instance)
             return Response({'message': 'Flight search saved successfully', 'data': response_serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class RentalCarListView(views.APIView):
     permission_classes = [permissions.IsAuthenticated, IsOnboardingCompletedPermission]
@@ -227,9 +264,26 @@ class RentalCarListView(views.APIView):
         serializer = RentalCarListSerializer(data=request.data)
         if serializer.is_valid():
             instance = serializer.save(user=request.user)
+            
+            # --- Email Notification ---
+            subject = 'Rental Car Search Confirmation'
+            message = f"Hello {instance.customer_name},\n\nYour rental car search at {instance.location} has been saved.\nPickup: {instance.pickup_time}\nDrop-off: {instance.dropoff_time}\n\nCoupon Code: {instance.coupon}\n\nThank you for choosing CheapTicket!"
+            
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    settings.EMAIL_HOST_USER,
+                    [request.user.email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
+
             response_serializer = RentalCarListSerializer(instance)
             return Response({'message': 'Rental Car search saved successfully', 'data': response_serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class HolidayPackageListView(views.APIView):
     permission_classes = [permissions.IsAuthenticated, IsOnboardingCompletedPermission]
@@ -239,9 +293,26 @@ class HolidayPackageListView(views.APIView):
         serializer = HolidayPackageListSerializer(data=request.data)
         if serializer.is_valid():
             instance = serializer.save(user=request.user)
+            
+            # --- Email Notification ---
+            subject = 'Holiday Package Search Confirmation'
+            message = f"Hello {instance.customer_name},\n\nYour holiday package search for {instance.to_location} has been saved.\nDuration: {instance.duration} days\n\nCoupon Code: {instance.coupon}\n\nThank you for choosing CheapTicket!"
+            
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    settings.EMAIL_HOST_USER,
+                    [request.user.email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
+
             response_serializer = HolidayPackageListSerializer(instance)
             return Response({'message': 'Holiday Package search saved successfully', 'data': response_serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class CruiseListView(views.APIView):
     permission_classes = [permissions.IsAuthenticated, IsOnboardingCompletedPermission]
@@ -251,6 +322,56 @@ class CruiseListView(views.APIView):
         serializer = CruiseListSerializer(data=request.data)
         if serializer.is_valid():
             instance = serializer.save(user=request.user)
+            
+            # --- Email Notification ---
+            subject = 'Cruise Search Confirmation'
+            message = f"Hello {instance.customer_name},\n\nYour cruise search for {instance.to_location} has been saved.\nDuration: {instance.duration} days\nCabins: {instance.cabins}\n\nCoupon Code: {instance.coupon}\n\nThank you for choosing CheapTicket!"
+            
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    settings.EMAIL_HOST_USER,
+                    [request.user.email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
+
             response_serializer = CruiseListSerializer(instance)
             return Response({'message': 'Cruise search saved successfully', 'data': response_serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class MultiCityFlightListView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated, IsOnboardingCompletedPermission]
+
+    @extend_schema(request=MultiCityFlightSerializer, responses={201: dict})
+    def post(self, request):
+        serializer = MultiCityFlightSerializer(data=request.data)
+        if serializer.is_valid():
+            # Save the multi-city flight and its legs
+            instance = serializer.save(user=request.user)
+            
+            # --- Email Notification (Like Nodemailer in Node.js) ---
+            # We can use Django's send_mail function
+            subject = 'Multi-City Flight Search Confirmation'
+            legs_info = "\n".join([f"- {leg.from_location} to {leg.to_location} on {leg.departure_date}" for leg in instance.legs.all()])
+            message = f"Hello {instance.customer_name},\n\nYour multi-city flight search has been saved.\n\nFlight Details:\n{legs_info}\n\nCoupon Code: {instance.coupon}\n\nThank you for choosing CheapTicket!"
+            
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    settings.EMAIL_HOST_USER,
+                    [request.user.email],
+                    fail_silently=True,
+                )
+            except Exception as e:
+                # Log error or handle it (optional)
+                pass
+
+            response_serializer = MultiCityFlightSerializer(instance)
+            return Response({'message': 'Multi-city flight search saved successfully', 'data': response_serializer.data}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

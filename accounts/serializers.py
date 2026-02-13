@@ -1,5 +1,42 @@
 from rest_framework import serializers
-from .models import Hotel, Flight,RentalCar, HolidayPackage, Cruise
+from .models import Hotel, Flight, RentalCar, HolidayPackage, Cruise, MultiCityFlight, MultiCityFlightLeg
+
+# ... other serializers ...
+
+# Multi-City Flight serializer
+class MultiCityFlightLegSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MultiCityFlightLeg
+        fields = ['from_location', 'to_location', 'departure_date']
+
+class MultiCityFlightSerializer(serializers.ModelSerializer):
+    legs = MultiCityFlightLegSerializer(many=True)
+    childrens = serializers.IntegerField(source='children', default=0)
+
+    class Meta:
+        model = MultiCityFlight
+        fields = ['customer_name', 'phone_number', 'adults', 'childrens', 'coupon', 'legs']
+        read_only_fields = ['coupon', 'customer_name', 'phone_number']
+
+    def create(self, validated_data):
+        legs_data = validated_data.pop('legs')
+        multi_city_flight = MultiCityFlight.objects.create(**validated_data)
+        for leg_data in legs_data:
+            MultiCityFlightLeg.objects.create(multi_city_flight=multi_city_flight, **leg_data)
+        return multi_city_flight
+
+    def validate(self, data):
+        adults = data.get('adults', 0)
+        children = data.get('children', 0)
+        if adults == 0 and children == 0:
+            raise serializers.ValidationError("Either adults or children must be at least 1.")
+        
+        legs = data.get('legs', [])
+        if not legs:
+            raise serializers.ValidationError("At least one flight leg is required for multi-city flights.")
+        
+        return data
+
 
 #authentication serializers
 class UserRegisterSerializer(serializers.Serializer):

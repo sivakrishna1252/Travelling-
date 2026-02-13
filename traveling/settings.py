@@ -23,9 +23,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-w0jpt$a7g*@3fvv^_9wls#+gi5ur^rlcqmyt6$b_s)_&z%db=a'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = [
+    "https://api.cheaptickethub.com",
+    "https://www.api.cheaptickethub.com",
+]
+ALLOWED_HOSTS = ['*',"api.cheaptickethub.com", "www.api.cheaptickethub.com"]
 
 
 # Application definition
@@ -382,16 +386,90 @@ UNFOLD = {
                         }
                     }
                     
-                    // Observer to detect when date pickers appear
-                    const observer = new MutationObserver((mutations) => {
+                    // Password toggle logic
+                    function setupPasswordToggle() {
+                        // Ensure font is loaded
+                        if (!document.getElementById('material-symbols-font')) {
+                            const fontLink = document.createElement('link');
+                            fontLink.id = 'material-symbols-font';
+                            fontLink.rel = 'stylesheet';
+                            fontLink.href = 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0';
+                            document.head.appendChild(fontLink);
+                        }
+
+                        const passwordInputs = document.querySelectorAll('input[type="password"]');
+                        passwordInputs.forEach(passwordInput => {
+                            if (passwordInput.dataset.toggleSetup === 'true') return;
+
+                            // Create toggle button
+                            const toggleBtn = document.createElement('span');
+                            toggleBtn.className = 'material-symbols-outlined password-toggle-icon';
+                            toggleBtn.textContent = 'visibility';
+                            toggleBtn.setAttribute('style', `
+                                position: absolute !important;
+                                right: 12px !important;
+                                top: 50% !important;
+                                transform: translateY(-50%) !important;
+                                cursor: pointer !important;
+                                color: #d97706 !important; /* Amber-600 to match theme */
+                                user-select: none !important;
+                                z-index: 100 !important;
+                                font-size: 22px !important;
+                                display: flex !important;
+                                align-items: center !important;
+                                justify-content: center !important;
+                                height: 100% !important;
+                            `);
+
+                            // Django Unfold structure fix
+                            const parent = passwordInput.parentElement;
+                            if (parent) {
+                                parent.style.position = 'relative';
+                                parent.appendChild(toggleBtn);
+                                
+                                // Ensure input doesn't hide behind icon
+                                passwordInput.style.paddingRight = '45px';
+                                
+                                toggleBtn.onclick = function(e) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (passwordInput.type === 'password') {
+                                        passwordInput.type = 'text';
+                                        toggleBtn.textContent = 'visibility_off';
+                                    } else {
+                                        passwordInput.type = 'password';
+                                        toggleBtn.textContent = 'visibility';
+                                    }
+                                };
+                                
+                                passwordInput.dataset.toggleSetup = 'true';
+                            }
+                        });
+                    }
+
+
+                    // Check for existing elements on load
+                    document.addEventListener('DOMContentLoaded', () => {
+                        // For calendars
+                        setTimeout(() => {
+                            const existingCalendars = document.querySelectorAll('.flatpickr-calendar');
+                            existingCalendars.forEach(cal => addSaveButton(cal));
+                        }, 500);
+
+                        // For password toggle
+                        setupPasswordToggle();
+                        setTimeout(setupPasswordToggle, 500);
+                    });
+
+                    // Also watch for mutations
+                    const appObserver = new MutationObserver((mutations) => {
                         mutations.forEach((mutation) => {
                             mutation.addedNodes.forEach((node) => {
                                 if (node.nodeType === 1) {
-                                    // Check if this node is a flatpickr calendar
+                                    // Check for calendars
                                     if (node.classList && node.classList.contains('flatpickr-calendar')) {
                                         setTimeout(() => addSaveButton(node), 100);
                                     }
-                                    // Check if node contains a flatpickr calendar
                                     const calendars = node.querySelectorAll && node.querySelectorAll('.flatpickr-calendar');
                                     if (calendars && calendars.length > 0) {
                                         calendars.forEach(cal => {
@@ -401,23 +479,14 @@ UNFOLD = {
                                 }
                             });
                         });
+                        setupPasswordToggle();
                     });
-                    
-                    // Start observing
-                    observer.observe(document.body, {
-                        childList: true,
-                        subtree: true
-                    });
-                    
-                    // Also check for existing calendars on load
-                    document.addEventListener('DOMContentLoaded', () => {
-                        setTimeout(() => {
-                            const existingCalendars = document.querySelectorAll('.flatpickr-calendar');
-                            existingCalendars.forEach(cal => addSaveButton(cal));
-                        }, 500);
-                    });
+                    appObserver.observe(document.body, { childList: true, subtree: true });
+
                 })();
             </script>
+
+
         """,
     ],
     "COLORS": {

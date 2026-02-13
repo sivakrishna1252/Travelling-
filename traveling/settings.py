@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-w0jpt$a7g*@3fvv^_9wls#+gi5ur^rlcqmyt6$b_s)_&z%db=a'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 CSRF_TRUSTED_ORIGINS = [
     "https://api.cheaptickethub.com",

@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import (
     SendOTPView, VerifyOTPView, CompleteOnboardingView, ForgotPasswordView,
-    HotelListView, FlightListView, RentalCarListView, HolidayPackageListView, CruiseListView, MultiCityFlightListView
+    HotelListView, FlightListView, RentalCarListView, HolidayPackageListView, CruiseListView, MultiCityFlightListView,
+    ContactSupportView
 )
 
 
@@ -17,6 +18,7 @@ urlpatterns = [
     path('rentalcar/', RentalCarListView.as_view(), name='rentalcar'),
     path('holidaypackage/', HolidayPackageListView.as_view(), name='holidaypackage'),
     path('cruise/', CruiseListView.as_view(), name='cruise'),
+    path('contact-support/', ContactSupportView.as_view(), name='contact-support'),
 ]
 
 

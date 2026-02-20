@@ -13,7 +13,7 @@ from .serializers import (
     UserProfileSerializer, VerifyOTPSerializer, 
     ResetPasswordSerializer, OTPSerializer,
     HotelListSerializer, FlightListSerializer, RentalCarListSerializer, HolidayPackageListSerializer, CruiseListSerializer,
-    MultiCityFlightSerializer
+    MultiCityFlightSerializer, ContactSupportSerializer
 )
 
 
@@ -375,3 +375,31 @@ class MultiCityFlightListView(views.APIView):
             return Response({'message': 'Multi-city flight search saved successfully', 'data': response_serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class ContactSupportView(views.APIView):
+    permission_classes = [permissions.AllowAny]
+
+    @extend_schema(request=ContactSupportSerializer, responses={200: dict})
+    def post(self, request):
+        serializer = ContactSupportSerializer(data=request.data)
+        if serializer.is_valid():
+            name = serializer.validated_data['name']
+            email = serializer.validated_data['email']
+            subject = serializer.validated_data['subject']
+            message = serializer.validated_data['message']
+
+            full_message = f"Name: {name}\nEmail: {email}\n\nMessage:\n{message}"
+            
+            try:
+                send_mail(
+                    subject,
+                    full_message,
+                    settings.EMAIL_HOST_USER,
+                    ['support@cheaptickethub.com'],
+                    fail_silently=False,
+                )
+                return Response({'message': 'Your message has been sent successfully.'}, status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response({'error': 'Failed to send message. Please try again later.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

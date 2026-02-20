@@ -1,6 +1,15 @@
 from rest_framework import serializers
 from .models import Hotel, Flight, RentalCar, HolidayPackage, Cruise, MultiCityFlight, MultiCityFlightLeg
 
+class ContactSupportSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=255, required=True, error_messages={'required': 'Please provide your name.'})
+    email = serializers.EmailField(required=True, error_messages={
+        'required': 'Email address is required.',
+        'invalid': 'Please enter a valid email address (e.g., user@example.com).'
+    })
+    subject = serializers.CharField(max_length=255, required=True, error_messages={'required': 'Subject is required.'})
+    message = serializers.CharField(required=True, error_messages={'required': 'Please enter your message.'})
+
 # ... other serializers ...
 
 # Multi-City Flight serializer
